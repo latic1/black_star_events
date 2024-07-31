@@ -114,7 +114,7 @@ export type CheckoutOrderParams = {
 
 export type CheckoutOrderResult = {
   authorization_url?: string;
-  error?: string;
+  error?: string|any;
 }
 
 export type CreateOrderParams = {
