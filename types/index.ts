@@ -112,6 +112,11 @@ export type CheckoutOrderParams = {
   buyerId: string
 }
 
+export type CheckoutOrderResult = {
+  authorization_url?: string;
+  error?: string;
+}
+
 export type CreateOrderParams = {
   stripeId: string
   eventId: string

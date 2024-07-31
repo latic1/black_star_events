@@ -26,7 +26,14 @@ const Checkout = ({ event, userId }: { event: IEvent; userId: string }) => {
       buyerId: userId,
     };
 
-    await checkoutOrder(order);
+    const result = await checkoutOrder(order);
+
+    
+    if (result.authorization_url) {
+      window.location.href = result.authorization_url;
+    } else {
+      console.error('Checkout failed:', result.error);
+    }
   };
 
   return (
@@ -40,32 +47,3 @@ const Checkout = ({ event, userId }: { event: IEvent; userId: string }) => {
 
 export default Checkout;
 
-// import axios from 'axios';
-
-// const API_SECRET_KEY = 'yoursecretkey';//Test Secret Key for Test mode on
-
-// const transactionDetails = {
-//   email: 'customer@email.com',
-//   amount: 10000,
-//   metadata: {
-//     custom_fields: [
-//       {
-//         display_name: "Customer's name",
-//         variable_name: "customer_name",
-//         value: "John Doe"
-//       }
-//     ]
-//   }
-// };
-
-// axios.post('https://api.paystack.co/transaction/initialize', transactionDetails, {
-//   headers: {
-//     Authorization: `Bearer ${API_SECRET_KEY}`
-//   }
-// })
-//   .then(response => {
-//     console.log(response.data);
-//   })
-//   .catch(error => {
-//     console.log(error);
-//   });

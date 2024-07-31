@@ -1,7 +1,7 @@
 "use server"
 
 // import Stripe from 'stripe';
-import { CheckoutOrderParams, CreateOrderParams, GetOrdersByEventParams, GetOrdersByUserParams } from "@/types"
+import { CheckoutOrderParams, CreateOrderParams, GetOrdersByEventParams, GetOrdersByUserParams, CheckoutOrderResult } from "@/types"
 import { redirect } from 'next/navigation';
 import { handleError } from '../utils';
 import { connectToDatabase } from '../database';
@@ -9,65 +9,66 @@ import Order from '../database/models/order.model';
 import Event from '../database/models/event.model';
 import { ObjectId } from 'mongodb';
 import User from '../database/models/user.model';
-import { usePaystackPayment } from 'react-paystack';
+
+const API_SECRET_KEY = process.env.PAYSTACK_PUBLIC_TEST_KEY;
 
 
-export const checkoutOrder = async (order: CheckoutOrderParams) => {
-  // console.log("buyer: ");
-  console.log("userid :",order);
+export const checkoutOrder = async (order: CheckoutOrderParams): Promise<CheckoutOrderResult> => {
+  try {
+    // Find the buyer by their ID
+    const buyer = await User.findById(order.buyerId);
 
+    // Calculate the price
+    const price = order.isFree ? 0 : Number(order.price) * 100;
 
-  const buyer = await User.findById(order.buyerId)
-  const price = order.isFree ? 0 : Number(order.price) * 100;
+    // Prepare transaction details
+    const transactionDetails = {
+      email: buyer.email,
+      amount: price,
+      currency: "GHS",
+      metadata: {
+        custom_fields: [
+          {
+            display_name: buyer.username,
+            variable_name: "customer_name",
+            value: buyer.username,
+          },
+        ],
+      },
+    };
 
-  
+    // Initialize the transaction with Paystack
+    const response = await fetch("https://api.paystack.co/transaction/initialize", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer sk_test_52e71345d65215548fb96f84cea1ba2ed7e754d3`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(transactionDetails),
+    });
 
+    // Handle the response
+    if (response.ok) {
+      const data = await response.json();
+      console.log(data);
 
-  console.log(buyer);
+      // Return the authorization_url to the client
+      if (data.status) {
+        return { authorization_url: data.data.authorization_url };
+      } else {
+        console.error("Transaction initialization failed:", data.message);
+        return { error: data.message };
+      }
+    } else {
+      console.error("Transaction initialization failed:", response.statusText);
+      return { error: response.statusText };
+    }
+  } catch (error) {
+    console.error("Error processing order:", error);
+    return { error: error };
+  }
+};
 
-
-
-
-
-  // const config = {
-  //   reference: (new Date()).getTime().toString(),
-  //   email: buyer.email,
-  //   amount: price, //Amount is in the country's lowest currency. E.g Kobo, so 20000 kobo = N200
-  //   publicKey: 'pk_test_dsdfghuytfd2345678gvxxxxxxxxxx',
-  // };
-
-
-
-  // try {
-  //   usePaystackPayment(config);
-
-  //   // const session = await stripe.checkout.sessions.create({
-  //   //   line_items: [
-  //   //     {
-  //   //       price_data: {
-  //   //         currency: 'usd',
-  //   //         unit_amount: price,
-  //   //         product_data: {
-  //   //           name: order.eventTitle
-  //   //         }
-  //   //       },
-  //   //       quantity: 1
-  //   //     },
-  //   //   ],
-  //   //   metadata: {
-  //   //     eventId: order.eventId,
-  //   //     buyerId: order.buyerId,
-  //   //   },
-  //   //   mode: 'payment',
-  //   //   success_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/profile`,
-  //   //   cancel_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/`,
-  //   // });
-
-  //   // redirect(session.url!)
-  // } catch (error) {
-  //   throw error;
-  // }
-}
 
 export const createOrder = async (order: CreateOrderParams) => {
   try {
