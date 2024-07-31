@@ -36,9 +36,12 @@ export async function POST(request: Request) {
     console.log(event.data);
     
     const { id, amount, metadata } = event.data;
+    console.log(metadata.eventId);
+    console.log(metadata.buyerId);
+    
 
     const order = {
-      stripeId: id,
+        transactionId: id,
       eventId: metadata?.eventId || '',
       buyerId: metadata?.buyerId || '',
       totalAmount: amount ? (amount / 100).toString() : '0',

@@ -27,13 +27,8 @@ export const checkoutOrder = async (order: CheckoutOrderParams): Promise<Checkou
       amount: price,
       currency: "GHS",
       metadata: {
-        custom_fields: [
-          {
-            display_name: buyer.username,
-            variable_name: "customer_name",
-            value: buyer.username,
-          },
-        ],
+        eventId: order.eventId,
+        buyerId: order.buyerId,
       },
     };
 
