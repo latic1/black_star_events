@@ -102,6 +102,33 @@ export const createOrder = async (order: CreateOrderParams) => {
 }
 
 
+export const sendEmail = async () => {
+  const mailDetails = {
+    to: "recipient@example.com",
+    eventName: "Sample Event",
+    eventDate: "2024-08-10",
+    eventLocation: "Sample Location",
+  };
+
+  const emailResponse = await fetch('/api/send', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(mailDetails),
+  });
+
+  if (!emailResponse.ok) {
+    const errorDetails = await emailResponse.json();
+    console.error('Failed to send email:', errorDetails);
+  } else {
+    console.log('Email sent successfully!');
+  }
+};
+
+
+
+
 // GET ORDERS BY EVENT
 export async function getOrdersByEvent({ searchString, eventId }: GetOrdersByEventParams) {
   try {

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { createOrder } from '@/lib/actions/order.actions';
+import { createOrder, sendEmail } from '@/lib/actions/order.actions';
 
 export async function POST(request: Request) {
   const API_SECRET_KEY = process.env.API_SECRET_KEY!;
@@ -41,6 +41,7 @@ export async function POST(request: Request) {
       createdAt: new Date(),
     };
 
+    await sendEmail();
     const newOrder = await createOrder(order);
     
     return NextResponse.json({ message: 'OK', order: newOrder });
