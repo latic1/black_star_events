@@ -42,9 +42,9 @@ export async function POST(request: Request) {
     };
 
     await sendEmail();
-    const newOrder = await createOrder(order);
+    // const newOrder = await createOrder(order);
     
-    return NextResponse.json({ message: 'OK', order: newOrder });
+    // return NextResponse.json({ message: 'OK', order: newOrder });
   }
 
   return new Response('', { status: 200 });
