@@ -61,6 +61,8 @@ export const createOrder = async (order: CreateOrderParams) => {
     // Find the buyer and event by their IDs
     const buyer = await User.findById(order.buyerId);
     const event = await Event.findById(order.eventId);
+    console.log("ifhiewhgiufheiwuhgiuhewihgiwhegiuhwiu");
+    
 
     if (!buyer || !event) {
       throw new Error("Buyer or event not found");
@@ -79,7 +81,7 @@ export const createOrder = async (order: CreateOrderParams) => {
       buyer: order.buyerId,
     });
 
-    const emailResponse = await fetch('/api/resend', {
+    const emailResponse = await fetch('/api/send', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

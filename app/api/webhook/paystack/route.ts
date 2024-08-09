@@ -30,9 +30,7 @@ export async function POST(request: Request) {
   const eventType = event.event;
 
   // CREATE
-  if (eventType === 'charge.success') {
-    console.log(event.data);
-    
+  if (eventType === 'charge.success') {    
     const { id, amount, metadata } = event.data;
 
     const order = {
@@ -44,6 +42,7 @@ export async function POST(request: Request) {
     };
 
     const newOrder = await createOrder(order);
+    
     return NextResponse.json({ message: 'OK', order: newOrder });
   }
 
