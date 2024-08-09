@@ -5,8 +5,6 @@ import { createOrder } from '@/lib/actions/order.actions';
 export async function POST(request: Request) {
   const API_SECRET_KEY = process.env.API_SECRET_KEY!;
 
-
-  console.log("keyy::",API_SECRET_KEY);
   
   const body = await request.text();
   const signature = request.headers.get('x-paystack-signature') as string;
@@ -36,9 +34,6 @@ export async function POST(request: Request) {
     console.log(event.data);
     
     const { id, amount, metadata } = event.data;
-    console.log(metadata.eventId);
-    console.log(metadata.buyerId);
-    
 
     const order = {
         transactionId: id,

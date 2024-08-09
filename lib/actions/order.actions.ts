@@ -41,22 +41,12 @@ export const checkoutOrder = async (order: CheckoutOrderParams): Promise<Checkou
       },
       body: JSON.stringify(transactionDetails),
     });
-
-    // Handle the response
-    if (response.ok) {
-      const data = await response.json();
-      console.log(data);
-
-      // Return the authorization_url to the client
-      if (data.status) {
-        return { authorization_url: data.data.authorization_url };
-      } else {
-        console.error("Transaction initialization failed:", data.message);
-        return { error: data.message };
-      }
+    const data = await response.json();
+    if (data.status) {
+      return { authorization_url: data.data.authorization_url };
     } else {
-      console.error("Transaction initialization failed:", response.statusText);
-      return { error: response.statusText };
+      console.error("Transaction initialization failed:", data.message);
+      return { error: data.message };
     }
   } catch (error) {
     console.error("Error processing order:", error);
@@ -64,10 +54,24 @@ export const checkoutOrder = async (order: CheckoutOrderParams): Promise<Checkou
   }
 };
 
-
 export const createOrder = async (order: CreateOrderParams) => {
   try {
     await connectToDatabase();
+
+    // Find the buyer and event by their IDs
+    const buyer = await User.findById(order.buyerId);
+    const event = await Event.findById(order.eventId);
+
+    if (!buyer || !event) {
+      throw new Error("Buyer or event not found");
+    }
+
+    const mailDetails = {
+      to: buyer.email, // Use buyer's email dynamically
+      eventName: event.title,
+      eventDate: event.startDateTime,
+      eventLocation: event.location,
+    };
 
     const newOrder = await Order.create({
       ...order,
@@ -75,11 +79,26 @@ export const createOrder = async (order: CreateOrderParams) => {
       buyer: order.buyerId,
     });
 
+    const emailResponse = await fetch('/api/resend', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(mailDetails),
+    });
+
+    if (!emailResponse.ok) {
+      console.error('Failed to send email');
+      // Optionally, throw an error here if you want to handle it differently
+    }
+
     return JSON.parse(JSON.stringify(newOrder));
+
   } catch (error) {
     handleError(error);
   }
 }
+
 
 // GET ORDERS BY EVENT
 export async function getOrdersByEvent({ searchString, eventId }: GetOrdersByEventParams) {
