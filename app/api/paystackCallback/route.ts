@@ -37,6 +37,6 @@ export async function GET(req: Request) {
         }
     } catch (error) {
         console.error("Error processing order:", error);
-        return { error: error };
+        // return { error: error };
     }
 }
