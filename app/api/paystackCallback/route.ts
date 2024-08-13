@@ -12,14 +12,17 @@ export async function GET(request: NextRequest) {
             return new NextResponse("Reference is required.", { status: 400 });
         }
 
+        console.log("code: ",reference);
+        
         // Initialize the transaction verification with Paystack
         const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+                Authorization: `Authorization: Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
                 'Content-Type': 'application/json',
             },
         });
+
 
         // Check if the response is ok
         if (!response.ok) {
