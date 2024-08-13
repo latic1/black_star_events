@@ -1,14 +1,17 @@
-export const GET = async ({ params, searchParams }: { params: any; searchParams: { reference?: string } }) => {
-    // Extract reference from searchParams
-    const { reference } = searchParams;
+import { NextRequest, NextResponse } from 'next/server';
 
-    // Check if reference is provided
-    if (!reference) {
-        console.error("No reference provided.");
-        return new Response("Reference is required.", { status: 400 });
-    }
-
+export async function GET(request: NextRequest) {
     try {
+        // Extract reference from the URL search params
+        const url = new URL(request.url);
+        const reference = url.searchParams.get('reference');
+
+        // Check if reference is provided
+        if (!reference) {
+            console.error("No reference provided.");
+            return new NextResponse("Reference is required.", { status: 400 });
+        }
+
         // Initialize the transaction verification with Paystack
         const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
             method: 'GET',
@@ -21,7 +24,7 @@ export const GET = async ({ params, searchParams }: { params: any; searchParams:
         // Check if the response is ok
         if (!response.ok) {
             console.error(`Error fetching transaction: ${response.statusText}`);
-            return new Response("Error fetching transaction.", { status: response.status });
+            return new NextResponse("Error fetching transaction.", { status: response.status });
         }
 
         // Parse the response data
@@ -29,11 +32,11 @@ export const GET = async ({ params, searchParams }: { params: any; searchParams:
         console.log(data);
 
         // Return the data as a JSON response
-        return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        return new NextResponse(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
     } catch (error) {
         console.error("Error processing order:", error);
-        return new Response("Error processing order.", { status: 500 });
+        return new NextResponse("Error processing order.", { status: 500 });
     }
 }
 
