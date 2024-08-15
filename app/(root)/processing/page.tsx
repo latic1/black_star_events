@@ -1,4 +1,5 @@
 "use client";
+import { sendMail } from "@/lib/actions/email.actions";
 import { createOrder } from "@/lib/actions/order.actions";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -8,7 +9,7 @@ const Page = () => {
   const router = useRouter();
   const reference = searchParams.get("reference");
 
-  console.log("reference:::::", reference);
+  // console.log("reference:::::", reference);
 
   useEffect(() => {
     const verifyTransaction = async () => {
@@ -30,7 +31,7 @@ const Page = () => {
           }
 
           const data = await response.json();
-          console.log(data);
+          // console.log(data);
 
           const { id, amount, metadata } = data.data;
 
@@ -38,8 +39,8 @@ const Page = () => {
             throw new Error("Metadata is missing in the response");
           }
 
-          console.log(metadata.eventId);
-          console.log(metadata.buyerId);
+          // console.log(metadata.eventId);
+          // console.log(metadata.buyerId);
 
           const order = {
             transactionId: id,
@@ -50,6 +51,7 @@ const Page = () => {
           };
 
           const newOrder = await createOrder(order);
+          await sendMail("laticlatif2@gmail.com");
           router.push("/profile");
         } catch (error) {
           console.error("Error verifying transaction:", error);
@@ -58,9 +60,13 @@ const Page = () => {
     };
 
     verifyTransaction();
-  }, [reference, router]); // Include `router` in the dependencies
+  }, [reference, router]);
 
-  return <p>Processing...</p>;
+  return (
+    <div className="max-h-screen bg-slate-50">
+      <p>Processing...</p>
+    </div>
+  );
 };
 
 export default Page;
