@@ -4,7 +4,12 @@ import { useRouter } from "next/router";
 
 const Page = () => {
   const router = useRouter();
-  const { reference } = router.query;
+  const { query } = router;
+
+  const reference = query.reference;
+
+  console.log("reference:::::",reference);
+  
 
   useEffect(() => {
     // Ensure the router is ready before accessing its properties
