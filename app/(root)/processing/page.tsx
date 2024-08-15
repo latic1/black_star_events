@@ -1,20 +1,14 @@
-"use client"
+"use client";
+import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import { useRouter } from "next/router";
 
 const Page = () => {
-  const router = useRouter();
-  const { query } = router;
+  const searchParams = useSearchParams();
+  const reference = searchParams.get("reference");
 
-  const reference = query.reference;
-
-  console.log("reference:::::",reference);
-  
+  console.log("reference:::::", reference);
 
   useEffect(() => {
-    // Ensure the router is ready before accessing its properties
-    if (!router.isReady) return;
-
     const verifyTransaction = async () => {
       if (reference) {
         try {
@@ -30,25 +24,23 @@ const Page = () => {
           );
 
           if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error("Network response was not ok");
           }
 
           const data = await response.json();
           console.log(data); // Handle the response data
 
           // Additional code to handle the data, like redirecting or displaying a message
-          
         } catch (error) {
-          console.error('Error verifying transaction:', error);
+          console.error("Error verifying transaction:", error);
         }
       }
     };
 
     verifyTransaction();
-  }, [router.isReady, reference]); // Add router.isReady and reference as dependencies
+  }, [reference]); // Add router.isReady and reference as dependencies
 
   return <p>Processing...</p>;
 };
 
 export default Page;
-
