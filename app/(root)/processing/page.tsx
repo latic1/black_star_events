@@ -4,14 +4,14 @@ import { useRouter } from "next/router";
 
 const Page = () => {
   const router = useRouter();
-  const { code } = router.query;
+  const { reference } = router.query;
 
   useEffect(() => {
     const verifyTransaction = async () => {
-      if (code) {
+      if (reference) {
         try {
           const response = await fetch(
-            `https://api.paystack.co/transaction/verify/${code}`,
+            `https://api.paystack.co/transaction/verify/${reference}`,
             {
               method: "GET",
               headers: {
@@ -35,7 +35,7 @@ const Page = () => {
     };
 
     verifyTransaction();
-  }, [code]);
+  }, [reference]);
 
   return <p>Processing...</p>;
 };
