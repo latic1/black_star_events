@@ -7,6 +7,9 @@ const Page = () => {
   const { reference } = router.query;
 
   useEffect(() => {
+    // Ensure the router is ready before accessing its properties
+    if (!router.isReady) return;
+
     const verifyTransaction = async () => {
       if (reference) {
         try {
@@ -28,6 +31,8 @@ const Page = () => {
           const data = await response.json();
           console.log(data); // Handle the response data
 
+          // Additional code to handle the data, like redirecting or displaying a message
+          
         } catch (error) {
           console.error('Error verifying transaction:', error);
         }
@@ -35,9 +40,10 @@ const Page = () => {
     };
 
     verifyTransaction();
-  }, [reference]);
+  }, [router.isReady, reference]); // Add router.isReady and reference as dependencies
 
   return <p>Processing...</p>;
 };
 
 export default Page;
+
