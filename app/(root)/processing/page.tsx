@@ -1,9 +1,11 @@
 "use client";
-import { useSearchParams } from "next/navigation";
+import { createOrder } from "@/lib/actions/order.actions";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 const Page = () => {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const reference = searchParams.get("reference");
 
   console.log("reference:::::", reference);
@@ -28,9 +30,27 @@ const Page = () => {
           }
 
           const data = await response.json();
-          console.log(data); // Handle the response data
+          console.log(data);
 
-          // Additional code to handle the data, like redirecting or displaying a message
+          const { id, amount, metadata } = data.data;
+
+          if (!metadata) {
+            throw new Error("Metadata is missing in the response");
+          }
+
+          console.log(metadata.eventId);
+          console.log(metadata.buyerId);
+
+          const order = {
+            transactionId: id,
+            eventId: metadata?.eventId || "",
+            buyerId: metadata?.buyerId || "",
+            totalAmount: amount ? (amount / 100).toString() : "0",
+            createdAt: new Date(),
+          };
+
+          const newOrder = await createOrder(order);
+          router.push("/profile");
         } catch (error) {
           console.error("Error verifying transaction:", error);
         }
@@ -38,7 +58,7 @@ const Page = () => {
     };
 
     verifyTransaction();
-  }, [reference]); // Add router.isReady and reference as dependencies
+  }, [reference, router]); // Include `router` in the dependencies
 
   return <p>Processing...</p>;
 };
