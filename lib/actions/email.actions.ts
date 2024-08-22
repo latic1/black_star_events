@@ -10,11 +10,14 @@ export const sendMail = async (email: CreateMailParams) => {
     const buyer = await User.findById(email.buyerId)
     const event = await Event.findById(email.eventId)
 
+    const name = `${buyer.firstName || ""} ${buyer.lastName || ""}`;
+
     const emailDetails = {
-      buyerName: buyer.name,
+      buyerName: name.trim(),
+      buyerEmail:buyer.email,
       eventTitle: event.title,
       eventLocation: event.location,
-      eventData: event.startDateTime
+      eventDate: event.startDateTime
     }
     console.log(emailDetails);
 

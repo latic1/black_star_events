@@ -160,6 +160,7 @@ export type CreateMailParams = {
 
 export type EmailDetailParams = {
   buyerName: string,
+  buyerEmail: string,
   eventTitle: string,
   eventLocation: string,
   eventDate: Date
