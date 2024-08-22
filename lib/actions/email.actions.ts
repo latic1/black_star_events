@@ -14,7 +14,7 @@ export const sendMail = async (email: CreateMailParams) => {
 
     const emailDetails = {
       buyerName: name.trim(),
-      buyerEmail:buyer.email,
+      buyerEmail:"laticlatif2@gmail.com",
       eventTitle: event.title,
       eventLocation: event.location,
       eventDate: event.startDateTime
