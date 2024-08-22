@@ -1,11 +1,24 @@
 "use server";
 
-export const sendMail = async (email: string) => {
+import { CreateMailParams } from "@/types";
+import User from "../database/models/user.model";
+import Event from "../database/models/event.model";
+
+export const sendMail = async (email: CreateMailParams) => {
   try {
-    // Prepare email details
+
+    const buyer = await User.findById(email.buyerId)
+    const event = await Event.findById(email.eventId)
+
     const emailDetails = {
-      email: email,
-    };
+      buyerName: buyer.name,
+      eventTitle: event.title,
+      eventLocation: event.location,
+      eventData: event.startDateTime
+    }
+    console.log(emailDetails);
+
+
 
     // Send Email
     const response = await fetch("https://blackstar-events.vercel.app/api/send", {

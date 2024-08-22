@@ -42,6 +42,11 @@ const Page = () => {
           // console.log(metadata.eventId);
           // console.log(metadata.buyerId);
 
+          const mailDetails = {
+            eventId: metadata?.eventId || "",
+            buyerId: metadata?.buyerId || "",
+          }
+
           const order = {
             transactionId: id,
             eventId: metadata?.eventId || "",
@@ -51,7 +56,7 @@ const Page = () => {
           };
 
           const newOrder = await createOrder(order);
-          await sendMail("laticlatif2@gmail.com");
+          await sendMail(mailDetails);
           router.push("/profile");
         } catch (error) {
           console.error("Error verifying transaction:", error);
@@ -63,8 +68,9 @@ const Page = () => {
   }, [reference, router]);
 
   return (
-    <div className="max-h-screen bg-slate-50">
-      <p>Processing...</p>
+    <div className="h-[80vh] bg-slate-50 flex flex-col items-center justify-center">
+      <p className="text-3xl mb-10 font-semibold">Processing Order</p>
+      <img src="/progress-indicator.gif" alt="" className="w-80 h-80" />
     </div>
   );
 };

@@ -152,3 +152,15 @@ export type SearchParamProps = {
   params: { id: string }
   searchParams: { [key: string]: string | string[] | undefined }
 }
+
+export type CreateMailParams = {
+  eventId: string
+  buyerId: string
+}
+
+export type EmailDetailParams = {
+  buyerName: string,
+  eventTitle: string,
+  eventLocation: string,
+  eventDate: Date
+}
