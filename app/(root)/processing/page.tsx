@@ -9,7 +9,7 @@ const Page = () => {
   const router = useRouter();
   const reference = searchParams.get("reference");
 
-  // console.log("reference:::::", reference);
+  console.log("reference:::::", reference);
 
   useEffect(() => {
     const verifyTransaction = async () => {
@@ -31,7 +31,7 @@ const Page = () => {
           }
 
           const data = await response.json();
-          // console.log(data);
+          console.log(data);
 
           const { id, amount, metadata } = data.data;
 
@@ -39,8 +39,8 @@ const Page = () => {
             throw new Error("Metadata is missing in the response");
           }
 
-          // console.log(metadata.eventId);
-          // console.log(metadata.buyerId);
+          console.log(metadata.eventId);
+          console.log(metadata.buyerId);
 
           const mailDetails = {
             eventId: metadata?.eventId || "",
