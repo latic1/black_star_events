@@ -8,5 +8,6 @@ export const EmailTemplate: React.FC<Readonly<EmailDetailParams>> = ({
 }) => (
   <div>
     <h1>Welcome, {buyerName}!</h1>
+    <p>this is your ticket</p>
   </div>
 );
