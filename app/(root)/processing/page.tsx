@@ -39,13 +39,10 @@ const Page = () => {
             throw new Error("Metadata is missing in the response");
           }
 
-          console.log(metadata.eventId);
-          console.log(metadata.buyerId);
-
           const mailDetails = {
             eventId: metadata?.eventId || "",
             buyerId: metadata?.buyerId || "",
-          }
+          };
 
           const order = {
             transactionId: id,
@@ -55,11 +52,14 @@ const Page = () => {
             createdAt: new Date(),
           };
 
-          const newOrder = await createOrder(order);
-          await sendMail(mailDetails);
+          // Execute order creation and email sending in parallel
+          await Promise.all([createOrder(order), sendMail(mailDetails)]);
+
+          // Redirect user to profile
           router.push("/profile");
         } catch (error) {
           console.error("Error verifying transaction:", error);
+          // Optional: Show user feedback or redirect to error page
         }
       }
     };

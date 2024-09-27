@@ -78,8 +78,10 @@ export const createOrder = async (order: CreateOrderParams) => {
     return JSON.parse(JSON.stringify(newOrder));
   } catch (error) {
     handleError(error);
+    return { success: false, message: 'Failed to create order', error };
   }
-}
+};
+
 
 // GET ORDERS BY EVENT
 export async function getOrdersByEvent({ searchString, eventId }: GetOrdersByEventParams) {
