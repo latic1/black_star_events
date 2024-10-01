@@ -1,5 +1,3 @@
-"use server"
-
 // import Stripe from 'stripe';
 import { CheckoutOrderParams, CreateOrderParams, GetOrdersByEventParams, GetOrdersByUserParams, CheckoutOrderResult } from "@/types"
 import { redirect } from 'next/navigation';
@@ -9,17 +7,36 @@ import Order from '../database/models/order.model';
 import Event from '../database/models/event.model';
 import { ObjectId } from 'mongodb';
 import User from '../database/models/user.model';
+import { sendMail } from "./email.actions";
 
 const API_SECRET_KEY = process.env.PAYSTACK_PUBLIC_TEST_KEY;
 
-
 export const checkoutOrder = async (order: CheckoutOrderParams): Promise<CheckoutOrderResult> => {
   try {
+    // If the event is free, create the order directly
+    if (order.isFree) {
+
+      const mailDetails = {
+        buyerId: order.buyerId,
+        eventId: order.eventId,
+      };
+      await createOrder({
+        transactionId: Math.floor(Math.random() * 1e10).toString().padStart(10, '0'),
+        buyerId: order.buyerId,
+        eventId: order.eventId,
+        totalAmount: "0",
+        createdAt: new Date(),
+      });
+      await sendMail(mailDetails)
+
+      return { success: true, message: 'Order created for free event' };
+    }
+
     // Find the buyer by their ID
     const buyer = await User.findById(order.buyerId);
 
     // Calculate the price
-    const price = order.isFree ? 0 : Number(order.price) * 100;
+    const price = Number(order.price) * 100; // Convert to cents for Paystack
 
     // Prepare transaction details
     const transactionDetails = {
@@ -36,7 +53,7 @@ export const checkoutOrder = async (order: CheckoutOrderParams): Promise<Checkou
     const response = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: {
-        Authorization: `Bearer sk_test_52e71345d65215548fb96f84cea1ba2ed7e754d3`,
+        Authorization: `Bearer ${API_SECRET_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(transactionDetails),
@@ -64,7 +81,6 @@ export const checkoutOrder = async (order: CheckoutOrderParams): Promise<Checkou
   }
 };
 
-
 export const createOrder = async (order: CreateOrderParams) => {
   try {
     await connectToDatabase();
@@ -81,91 +97,3 @@ export const createOrder = async (order: CreateOrderParams) => {
     return { success: false, message: 'Failed to create order', error };
   }
 };
-
-
-// GET ORDERS BY EVENT
-export async function getOrdersByEvent({ searchString, eventId }: GetOrdersByEventParams) {
-  try {
-    await connectToDatabase()
-
-    if (!eventId) throw new Error('Event ID is required')
-    const eventObjectId = new ObjectId(eventId)
-
-    const orders = await Order.aggregate([
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'buyer',
-          foreignField: '_id',
-          as: 'buyer',
-        },
-      },
-      {
-        $unwind: '$buyer',
-      },
-      {
-        $lookup: {
-          from: 'events',
-          localField: 'event',
-          foreignField: '_id',
-          as: 'event',
-        },
-      },
-      {
-        $unwind: '$event',
-      },
-      {
-        $project: {
-          _id: 1,
-          totalAmount: 1,
-          createdAt: 1,
-          eventTitle: '$event.title',
-          eventId: '$event._id',
-          buyer: {
-            $concat: ['$buyer.firstName', ' ', '$buyer.lastName'],
-          },
-        },
-      },
-      {
-        $match: {
-          $and: [{ eventId: eventObjectId }, { buyer: { $regex: RegExp(searchString, 'i') } }],
-        },
-      },
-    ])
-
-    return JSON.parse(JSON.stringify(orders))
-  } catch (error) {
-    handleError(error)
-  }
-}
-
-// GET ORDERS BY USER
-export async function getOrdersByUser({ userId, limit = 3, page }: GetOrdersByUserParams) {
-  try {
-    await connectToDatabase()
-
-    const skipAmount = (Number(page) - 1) * limit
-    const conditions = { buyer: userId }
-
-    const orders = await Order.distinct('event._id')
-      .find(conditions)
-      .sort({ createdAt: 'desc' })
-      .skip(skipAmount)
-      .limit(limit)
-      .populate({
-        path: 'event',
-        model: Event,
-        populate: {
-          path: 'organizer',
-          model: User,
-          select: '_id firstName lastName',
-        },
-      })
-
-    const ordersCount = await Order.distinct('event._id').countDocuments(conditions)
-
-    return { data: JSON.parse(JSON.stringify(orders)), totalPages: Math.ceil(ordersCount / limit) }
-  } catch (error) {
-    handleError(error)
-  }
-}

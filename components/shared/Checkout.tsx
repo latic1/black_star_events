@@ -2,8 +2,11 @@ import React, { useEffect } from "react";
 import { IEvent } from "@/lib/database/models/event.model";
 import { Button } from "../ui/button";
 import { checkoutOrder } from "@/lib/actions/order.actions";
+import { useRouter } from "next/navigation";
 
 const Checkout = ({ event, userId }: { event: IEvent; userId: string }) => {
+  const router = useRouter();
+
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
     if (query.get("success")) {
@@ -33,6 +36,11 @@ const Checkout = ({ event, userId }: { event: IEvent; userId: string }) => {
       window.location.href = result.authorization_url;
     } else {
       console.error('Checkout failed:', result.error);
+    }
+
+    if(result.success){
+      router.push("/profile");
+
     }
   };
 

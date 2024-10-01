@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
     try {
         const { data, error } = await resend.emails.send({
-            from: 'Acme <onboarding@resend.dev>',
+            from: 'Black Star Events <Events@latic.online>',
             to: ticketDetail.buyerEmail,
             subject: 'Hello world',
             react: EmailTemplate(ticketDetail),

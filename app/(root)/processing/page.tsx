@@ -9,7 +9,6 @@ const Page = () => {
   const router = useRouter();
   const reference = searchParams.get("reference");
 
-  console.log("reference:::::", reference);
 
   useEffect(() => {
     const verifyTransaction = async () => {
