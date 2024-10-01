@@ -9,12 +9,31 @@ import Order from '../database/models/order.model';
 import Event from '../database/models/event.model';
 import { ObjectId } from 'mongodb';
 import User from '../database/models/user.model';
+import { sendMail } from "./email.actions";
 
 const API_SECRET_KEY = process.env.PAYSTACK_PUBLIC_TEST_KEY;
 
 
 export const checkoutOrder = async (order: CheckoutOrderParams): Promise<CheckoutOrderResult> => {
   try {
+
+    if (order.isFree) {
+
+      const mailDetails = {
+        buyerId: order.buyerId,
+        eventId: order.eventId,
+      };
+      await createOrder({
+        transactionId: Math.floor(Math.random() * 1e10).toString().padStart(10, '0'),
+        buyerId: order.buyerId,
+        eventId: order.eventId,
+        totalAmount: "0",
+        createdAt: new Date(),
+      });
+      sendMail(mailDetails)
+      return { success: true, message: 'Order created for free event' };
+    }
+
     // Find the buyer by their ID
     const buyer = await User.findById(order.buyerId);
 
