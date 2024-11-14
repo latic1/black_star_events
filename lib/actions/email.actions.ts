@@ -36,7 +36,7 @@ export const sendMail = async (email: CreateMailParams) => {
       throw new Error(`Failed to send email: ${response.statusText}`);
     }
 
-    return await response.json(); // Assuming the response returns JSON
+    return await response.json(); 
 
   } catch (error) {
     console.error("Error sending email:", error);
